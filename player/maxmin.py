@@ -137,7 +137,7 @@ class MaxminPlayer:
                 ]
             )
         if not w:
-            w = [1, 1, 1, 1, 1, 1, 1, 1]
+            w = [3, 1, 1, 5, 1, 1, 1, -1]
         f_11, f_12, f_13, f_21, f_22, f_23, w_1, w_2 = w
         X = np.array(state)
         Y = np.zeros_like(X, dtype=int)

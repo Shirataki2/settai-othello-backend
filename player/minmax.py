@@ -137,7 +137,7 @@ class MinmaxPlayer:
                 ]
             )
         if not w:
-            w = [1, 1, 1, 1, 1, 1, 1, 1]
+            w = [3, 1, 1, 0, 1, 1, 1, 1]
         f_11, f_12, f_13, f_21, f_22, f_23, w_1, w_2 = w
         X = np.array(state)
         Y = np.zeros_like(X, dtype=int)
@@ -145,7 +145,7 @@ class MinmaxPlayer:
         Y[X == game.opponent(color)] = w_2
         score = int((Y * W).sum())
         vp = int(f_21) * (int(f_22) * len(Board(state).valid_pos(self)) -
-                          int(f_23) * len(Board(state).valid_pos(MaxminPlayer(game.opponent(color)))))
+                          int(f_23) * len(Board(state).valid_pos(MinmaxPlayer(game.opponent(color)))))
         dif = int(f_11) * (int(f_12) * np.bincount((X == color).ravel())[1] -
                            int(f_13) * np.bincount((X == game.opponent(color)).ravel())[1])
         score += vp + dif
