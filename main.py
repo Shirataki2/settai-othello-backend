@@ -57,9 +57,9 @@ def put():
         if validate(b.board_data, "B", [x, y]):
             do_move(b.board_data, "B", [x, y])
     plisult = deepcopy(b.board_data)
-    if adv and data["difficulty"] > 0:
+    if adv and depth > 0:
         nm = q.next_move(b.board_data, "W", depth, W, w)
-    elif data["difficulty"] > 0:
+    elif depth > 0:
         nm = q.next_move(b.board_data, "W", depth)
     else:
         nm = q.next_move(b.board_data, "W")
