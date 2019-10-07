@@ -23,7 +23,6 @@ def evaluate():
     for i in range(8):
         b2.append(list(b1[i*8:(i+1)*8]))
     mode = "maxmin" if data["mode"] == 'settai' else "minmax"
-    depth = int(data["difficulty"]) * 2 - 1
     p = get_player_instance(mode, "B")
     b = Board(b2)
     b3 = deepcopy(b.board_data)
@@ -39,11 +38,17 @@ def put():
     b1 = data["board"]
     x = int(data["x"])
     y = int(data["y"])
+    adv = data["adv"]
+    if adv:
+        W = deepcopy(data["W"])
+        w = deepcopy(data["w"])
     b2 = []
     for i in range(8):
         b2.append(list(b1[i*8:(i+1)*8]))
     mode = "maxmin" if data["mode"] == 'settai' else "minmax"
-    depth = int(data["difficulty"]) * 2 - 1
+    if data["difficulty"] == 0:
+        mode = "random"
+    depth = int(data["difficulty"])
     p = get_player_instance(mode, "B")
     q = get_player_instance(mode, "W")
     b = Board(b2)
@@ -52,7 +57,12 @@ def put():
         if validate(b.board_data, "B", [x, y]):
             do_move(b.board_data, "B", [x, y])
     plisult = deepcopy(b.board_data)
-    nm = q.next_move(b.board_data, "W", depth)
+    if adv and data["difficulty"] > 0:
+        nm = q.next_move(b.board_data, "W", depth, W, w)
+    elif data["difficulty"] > 0:
+        nm = q.next_move(b.board_data, "W", depth)
+    else:
+        nm = q.next_move(b.board_data, "W")
     if validate(b.board_data, "W", nm):
         do_move(b.board_data, "W", nm)
     qlisult = b.board_data
@@ -64,4 +74,4 @@ def put():
 
 
 if __name__ == "__main__":
-    app.run("0.0.0.0", 9090, True)
+    app.run("0.0.0.0", 5050, True)

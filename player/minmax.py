@@ -11,10 +11,11 @@ class MinmaxPlayer:
         self.color = color
         self.name = "MinMax"
 
-    def next_move(self, board, color, depth=2):
+    def next_move(self, board, color, depth=2, W=None, w=None):
         if game.validate(board, color, 'pass'):
             return "pass"
-        mov, val = self.max_val(board, -self.inf, self.inf, depth, color)
+        mov, val = self.max_val(
+            board, -self.inf, self.inf, depth, color, W=W, w=w)
         return mov
 
     def get_valid_pos(self):
@@ -51,11 +52,11 @@ class MinmaxPlayer:
     def end_state(self, state):
         return game.validate(state, "B", "pass") and game.validate(state, "W", "pass")
 
-    def max_val(self, state, alpha, beta, depth, color, rev=False):
+    def max_val(self, state, alpha, beta, depth, color, rev=False, W=None, w=None):
         if self.end_state(state):
             return None, self.utility(state, color)
         elif depth == 0:
-            return None, self.evaluate(state, color)
+            return None, self.evaluate(state, color, W=W, w=w)
         best = None
         v = -self.inf
         if not rev:
@@ -63,7 +64,8 @@ class MinmaxPlayer:
         else:
             moves = self.successors(state, game.opponent(color))
         for mov, state in moves:
-            val = self.min_val(state, alpha, beta, depth - 1, color, rev)[1]
+            val = self.min_val(state, alpha, beta, depth -
+                               1, color, rev, W=W, w=w)[1]
             if best is None or val > v:
                 best = mov
                 v = val
@@ -72,11 +74,11 @@ class MinmaxPlayer:
             alpha = max(alpha, v)
         return best, v
 
-    def min_val(self, state, alpha, beta, depth, color, rev=False):
+    def min_val(self, state, alpha, beta, depth, color, rev=False, W=None, w=None):
         if self.end_state(state):
             return None, self.utility(state, color)
         elif depth == 0:
-            return None, self.evaluate(state, color)
+            return None, self.evaluate(state, color, W=W, w=w)
         best = None
         v = self.inf
         if rev:
@@ -84,7 +86,8 @@ class MinmaxPlayer:
         else:
             moves = self.successors(state, game.opponent(color))
         for mov, state in moves:
-            val = self.max_val(state, alpha, beta, depth - 1, color, rev)[1]
+            val = self.max_val(state, alpha, beta, depth -
+                               1, color, rev, W=W, w=w)[1]
             if best is None or val < v:
                 best = mov
                 v = val
@@ -119,24 +122,33 @@ class MinmaxPlayer:
             ans = -self.inf
         return ans
 
-    def evaluate(self, state, color):
-        W = np.array(
-            [
-                [99, -8,  8,  6,  6,  8, -8, 99],
-                [-8, -24, -4, -3, -3, -4, -24, -8],
-                [8, -4,  7,  4,  4,  7, -4,  8],
-                [6, -3,  4,  0,  0,  4, -3,  6],
-                [6, -3,  4,  0,  0,  4, -3,  6],
-                [8, -4,  7,  4,  4,  7, -4,  8],
-                [-8, -24, -4, -3, -3, -4, -24, -8],
-                [99, -8,  8,  6,  6,  8, -8, 99],
-            ]
-        )
+    def evaluate(self, state, color, W=None, w=None):
+        if not W:
+            W = np.array(
+                [
+                    [70, -12,  0,  -1,  -1,  0, -12, 70],
+                    [-12, -15, -3, -3, -3, -3, -15, -12],
+                    [0, -3,  0,  -1,  -1,  0, -3,  0],
+                    [-1, -3,  -1,  -1,  -1,  -1, -3,  -1],
+                    [-1, -3,  -1,  -1,  -1,  -1, -3,  -1],
+                    [0, -3,  0,  -1,  -1,  0, -3,  0],
+                    [-12, -15, -3, -3, -3, -3, -15, -12],
+                    [70, -12,  0,  -1,  -1,  0, -12, 70],
+                ]
+            )
+        if not w:
+            w = [1, 1, 1, 1, 1, 1, 1, 1]
+        f_11, f_12, f_13, f_21, f_22, f_23, w_1, w_2 = w
         X = np.array(state)
         Y = np.zeros_like(X, dtype=int)
-        Y[X == color] = 1
-        Y[X == game.opponent(color)] = -1
+        Y[X == color] = w_1
+        Y[X == game.opponent(color)] = w_2
         score = int((Y * W).sum())
+        vp = f_21 * (f_22 * len(Board(state).valid_pos(self)) -
+                     f_23 * len(Board(state).valid_pos(MinmaxPlayer(game.opponent(color)))))
+        dif = f_11 * (f_12 * np.bincount((X == color).ravel())[1] -
+                      f_13 * np.bincount((X == game.opponent(color)).ravel())[1])
+        score += vp + dif
         return score
 
     def get_game_result(self, board_data, game_ended=False, opponent=None):
