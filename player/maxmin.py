@@ -144,10 +144,10 @@ class MaxminPlayer:
         Y[X == color] = w_1
         Y[X == game.opponent(color)] = w_2
         score = int((Y * W).sum())
-        vp = f_21 * (f_22 * len(Board(state).valid_pos(self)) -
-                     f_23 * len(Board(state).valid_pos(MaxminPlayer(game.opponent(color)))))
-        dif = f_11 * (f_12 * np.bincount((X == color).ravel())[1] -
-                      f_13 * np.bincount((X == game.opponent(color)).ravel())[1])
+        vp = int(f_21) * (int(f_22) * len(Board(state).valid_pos(self)) -
+                          int(f_23) * len(Board(state).valid_pos(MaxminPlayer(game.opponent(color)))))
+        dif = int(f_11) * (int(f_12) * np.bincount((X == color).ravel())[1] -
+                           int(f_13) * np.bincount((X == game.opponent(color)).ravel())[1])
         score += vp + dif
         return -score
 
